@@ -1,0 +1,39 @@
+name: Build and Deploy Test Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      docker-registry:
+        description: 'Docker registry'
+        default: ''
+        required: false
+        type: string
+      unit-test:
+        description: 'Run unit tests'
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Checkout this project source code
+      - uses: actions/checkout@v3
+      # Simulate a call from an existing project using our action.
+      # In this case we simulate a Node app
+      - run: mv test/node-app/* app/
+      # Run unit tests if requested
+      - run: ./test/helpers/main.sh
+        if: inputs.unit-test == true
+        env:
+          KKA_APP_PATH: ./app
+          KKA_APP_REGISTRY: ''
+          KKA_APP_DOCKERFILE: ''
+      # Run the action code
+      - uses: ./
+        with:
+          app-name: k8s-kurated-addons-test-app-${{ github.ref_name }}
+          app-port: 8080
+          docker-registry: ${{ inputs.docker-registry }}

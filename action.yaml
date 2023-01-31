@@ -1,0 +1,58 @@
+name: 'k8s-kurated-addons CICD pipeline'
+description: 'Build a container on top of your core and deploy it to a Kubernetes cluster created with the k8s-kurated-addons stack'
+inputs:
+  app-name:
+    description: 'The name of your app. This will be used both as the image name as well as the Knative service name for the deployment.'
+    required: false
+    default: ''
+  app-port:
+    description: 'The port of your app. Usually this is the HTTP/HTTPS port your own app want to be approached to.'
+    required: false
+    default: '8080'
+  docker-registry:
+    description: 'Docker registry to use to host the built container. By default, the action will use the Github Packages registry ghcr.io'
+    required: false
+    default: 'ghcr.io'
+  dockerfile-path:
+    description: 'Path to the Dockerfile. If empty the action will try to guess the project type and use a default provided one.'
+    required: false
+    default: ''
+  kubernetes-manifest:
+    description: 'The Kubernetes manifest to use to deploy. If empty the action will use a default provided one.'
+    required: false
+    default: './manifests/knative-app.yaml'
+outputs: {}
+runs:
+  using: "composite"
+  steps:
+    - name: Login to GitHub Container Registry
+      if: inputs.docker-registry == 'ghcr.io'
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ inputs.docker-registry }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - run: |
+        # Ensure paths are absolute
+        export KKA_APP_PATH=$(realpath ${KKA_APP_PATH})
+        export KKA_APP_DOCKERFILE=$(realpath ${KKA_APP_DOCKERFILE})
+        export KKA_APP_K8S_DEPLOY_MANIFEST=$(realpath ${KKA_APP_K8S_DEPLOY_MANIFEST})
+        # Remove the only known file
+        rm ${KKA_APP_PATH}/.gitkeep
+        # If our ./app folder is empty...
+        if [ "$(ls -A ${KKA_APP_PATH})" == "" ]; then
+          # ...copy the calling app code into ./app
+          rsync -qaP --exclude=.git --exclude=.github $(pwd)/* ${KKA_APP_PATH}/
+        fi
+        # Start the container build and deploy
+        pushd ${{ github.action_path }}
+        ./src/main.sh
+        popd
+      shell: bash
+      env:
+        KKA_APP_PATH: ${{ github.action_path }}/app
+        KKA_APP_NAME: ${{ inputs.app-name }}
+        KKA_APP_PORT:  ${{ inputs.app-port }}
+        KKA_APP_REGISTRY: ${{ inputs.docker-registry }}/${{ github.repository_owner }}
+        KKA_APP_DOCKERFILE: ${{ inputs.dockerfile-path }}
+        KKA_APP_K8S_DEPLOY_MANIFEST: ${{ inputs.kubernetes-manifest }}

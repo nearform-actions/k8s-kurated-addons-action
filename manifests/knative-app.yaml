@@ -1,0 +1,11 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${KKA_APP_NAME}
+spec:
+  template:
+    spec:
+      containers:
+        - image: ${KKA_APP_REGISTRY}/${KKA_APP_NAME}
+          ports:
+            - containerPort: ${KKA_APP_PORT}
