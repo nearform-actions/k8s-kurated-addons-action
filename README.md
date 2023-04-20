@@ -21,7 +21,7 @@ In order to use this action, all you need it add this snippet to your own workfl
 | input                 | required | default                        | description |
 |-----------------------|----------|--------------------------------|-------------|
 | `app-name`            | no       | `''`                           | The name of your app. This will be used both as the image name as well as the Knative service name for the deployment. |
-| `app-port`            | no       | `8080`                         | The port of your app. Usually this is the HTTP/HTTPS port your own app want to be approached to. |
+| `app-port`            | no       | `8080`                         | The port of your app. Usually this is the HTTP/HTTPS port your own app will be listening on. |
 | `docker-registry`     | no       | `ghcr.io`                      | Docker registry to use to host the built container. |
 | `dockerfile-path`     | no       | `''`                           | The Dockerfile to use. If not set, the action will attempt to autodetect the project type and use accordingly a well-known one for your project type. |
 | `kubernetes-manifest` | no       | `./manifests/knative-app.yaml` | The Kubernetes manifest to use. If not set, the action will use a pre-made Knative manifest. |
