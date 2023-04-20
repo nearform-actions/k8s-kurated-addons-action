@@ -9,14 +9,23 @@ In order to use this action, all you need it add this snippet to your own workfl
 ```yaml
 - uses: nearform-actions/k8s-kurated-addons-action@main
   with:
-    app-name: my-app-name # OPTIONAL: Your application name. If not set, it will use your repository name
-    app-port: 8080 # OPTIONAL: Your application port. If not set, 8080 will be used
-    docker-registry: ghcr.io # OPTIONAL: The docker registry to use. If not set, the action will try to use ghcr.io
-    dockerfile-path: ./Dockerfile # OPTIONAL: The Dockerfile to use. If not set, the action will attempt to autodetect the project type and use accordingly a well-known one for your project type
-    kubernetes-manifest: ./knative.yaml # OPTIONAL: The Kubernetes manifest to use. If not set, the action will use a pre-made Knative manifest
+    app-name: my-app-name
+    app-port: 8080
+    docker-registry: ghcr.io
+    dockerfile-path: ./Dockerfile 
+    kubernetes-manifest: ./knative.yaml
 ```
 
-For a more in-depth documentation around the current available inputs, see the [action manifest inputs section](action.yaml#L3).
+## Inputs
+
+| input                 | required | default                        | description |
+|-----------------------|----------|--------------------------------|-------------|
+| `app-name`            | no       | `''`                           | The name of your app. This will be used both as the image name as well as the Knative service name for the deployment. |
+| `app-port`            | no       | `8080`                         | The port of your app. Usually this is the HTTP/HTTPS port your own app want to be approached to. |
+| `docker-registry`     | no       | `ghcr.io`                      | Docker registry to use to host the built container. |
+| `dockerfile-path`     | no       | `''`                           | The Dockerfile to use. If not set, the action will attempt to autodetect the project type and use accordingly a well-known one for your project type. |
+| `kubernetes-manifest` | no       | `./manifests/knative-app.yaml` | The Kubernetes manifest to use. If not set, the action will use a pre-made Knative manifest. |
+
 
 ## How to test locally
 
